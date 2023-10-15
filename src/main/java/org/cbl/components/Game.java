@@ -2,6 +2,7 @@ package org.cbl.components;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -13,7 +14,7 @@ public class Game implements MouseListener, ActionListener, WindowListener {
 
     private boolean isPlaying = true;
 
-    public Game() {
+    public Game() throws IOException {
         this.gui = new UI();
 
 
@@ -54,8 +55,15 @@ public class Game implements MouseListener, ActionListener, WindowListener {
         JMenuItem menuItem = (JMenuItem) e.getSource();
     }
 
+    /**
+     * Mouse click listener
+     * @param e the click to be processed
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (SwingUtilities.isRightMouseButton(e)) {
+            return;
+        }
 
     }
 
