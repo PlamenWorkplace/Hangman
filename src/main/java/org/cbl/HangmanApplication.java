@@ -4,7 +4,7 @@ import org.cbl.components.Game;
 
 import java.io.IOException;
 
-public class Application {
+public class HangmanApplication {
     public static void main(String[] args) throws IOException {
         new Game();
     }

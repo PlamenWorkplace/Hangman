@@ -45,7 +45,6 @@ public class Dialog extends TimerTask {
                                  }
         );
 
-        dialog.setTitle("Game Dialog");
         dialog.add(container);
         dialog.pack();
         dialog.setLocationRelativeTo(game);

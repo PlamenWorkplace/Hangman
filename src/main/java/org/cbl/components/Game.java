@@ -18,32 +18,25 @@ import java.util.Timer;
 public class Game extends JFrame {
 
     // Button Columns
-    private JButton[] first;
-    private JButton[] second;
-    private JButton[] third;
+    private JButton[] firstColumn;
+    private JButton[] secondColumn;
+    private JButton[] thirdColumn;
 
     // Icons
-    private Iterator<Icon> hangingMen;
-    private ImageIcon warning;
+    private Iterator<Icon> hangmenIterator;
+    private final ImageIcon warningIcon;
 
     // Top components
-    private final JLabel hangman;
+    private final JLabel drawing;
     private final JPanel wordPanel;
     private JLabel[] wordToGuess;
     private char[] wordCharSeq;
 
     // Label above keyboard
-    private final JLabel textLabel;
+    private final Text textLabel;
 
     // Keyboard
-    private final JPanel keyboard;
-
-    // Labels
-    private static final String[] START = {"TEST YOUR LUCK!", "MAKE YOUR FIRST GUESS!"};
-    private static final String[] CORRECT = {"CORRECT!", "NICELY DONE!", "LUCKY YOU!"};
-    private static final String[] WRONG = {"OOPS, SORRY!", "WRONG!", "TRY AGAIN!", "OUT OF LUCK?"};
-    private static final String[] WON = {"YOU WON!", "VICTORY!"};
-    private static final String[] LOST = {"HANGED!", "YOU LOST!", "LOSER!"};
+    private final Keyboard keyboard;
 
     public Game() throws HeadlessException, IOException {
         this.addWindowListener(new WindowAdapter() {
@@ -52,7 +45,7 @@ public class Game extends JFrame {
                                         Object[] options = {"Exit", "Cancel"};
 
                                         int quit = JOptionPane.showOptionDialog(null, "Your progress will be lost.",
-                                                "Exit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, warning, options, options[1]);
+                                                "Exit?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, warningIcon, options, options[1]);
 
                                         if (quit == JOptionPane.OK_OPTION) {
                                             System.exit(0);
@@ -60,7 +53,9 @@ public class Game extends JFrame {
                                     }
                                 }
         );
-        setIcons();
+        warningIcon = new ImageIcon(new ImageIcon(Objects.requireNonNull(
+                getClass().getClassLoader().getResource("warning.png")
+        )).getImage().getScaledInstance(50, 50,  java.awt.Image.SCALE_SMOOTH));
         setContentPane(new JLabel(new ImageIcon(
                 new ImageIcon(Objects.requireNonNull(
                         getClass().getClassLoader().getResource("background.jpeg")
@@ -87,24 +82,20 @@ public class Game extends JFrame {
         topComponents.add(wordPanel);
 
         // Adds hangman to top panel
-        hangman = new JLabel();
-        hangman.setHorizontalAlignment(SwingConstants.CENTER);
-        topComponents.add(hangman);
+        drawing = new JLabel();
+        drawing.setHorizontalAlignment(SwingConstants.CENTER);
+        topComponents.add(drawing);
 
-        // Adds label above keyboard
+        // Adds text label above keyboard
         JPanel panel = new JPanel(new BorderLayout());
         panel.setMaximumSize(new Dimension(1000, 20));
         panel.setOpaque(false);
-        textLabel = new JLabel();
-        textLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        textLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        textLabel = new Text();
         panel.add(textLabel, BorderLayout.SOUTH);
         add(panel);
 
         // Adds keyboard
-        keyboard = new JPanel();
-        keyboard.setOpaque(false);
-        keyboard.setLayout(new BoxLayout(keyboard, BoxLayout.PAGE_AXIS));
+        keyboard = new Keyboard();
         add(keyboard);
 
         newGame();
@@ -117,7 +108,7 @@ public class Game extends JFrame {
      */
     public void newGame() throws IOException {
         setTopComponents();
-        setLabel();
+        textLabel.setup();
         setKeyboard();
     }
 
@@ -143,16 +134,7 @@ public class Game extends JFrame {
 
         // Sets up hangman drawing
         setHangmenIcons();
-        hangman.setIcon(hangingMen.next());
-    }
-
-    /**
-     * Sets the label that displays the status of the game
-     */
-    private void setLabel() {
-        textLabel.setText(START[(int)(Math.random() * START.length)]);
-        textLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 16));
-        textLabel.setForeground(new Color(249, 85, 0)); // Orange
+        drawing.setIcon(hangmenIterator.next());
     }
 
     /**
@@ -188,13 +170,13 @@ public class Game extends JFrame {
             buttonPane.add(buttonRow[i]);
         }
         if (i == 10) {
-            first = buttonRow;
+            firstColumn = buttonRow;
         }
         if (i == 9) {
-            second = buttonRow;
+            secondColumn = buttonRow;
         }
         if (i == 7) {
-            third = buttonRow;
+            thirdColumn = buttonRow;
             buttonPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 60, 0));
         }
         return buttonPane;
@@ -220,13 +202,13 @@ public class Game extends JFrame {
         if(!isFound) {
             button.setForeground(new Color(255, 91, 91));
             textLabel.setForeground(new Color(249, 85, 0));
-            hangman.setIcon(hangingMen.next());
+            drawing.setIcon(hangmenIterator.next());
 
-            if (!hangingMen.hasNext()) {
+            if (!hangmenIterator.hasNext()) {
                 endGame(false);
             }
             else {
-                textLabel.setText(WRONG[(int)(Math.random() * WRONG.length)]);
+                textLabel.setToWrong();
             }
 
         } else {
@@ -244,10 +226,8 @@ public class Game extends JFrame {
             if (isWordRevealed) {
                 endGame(true);
             } else {
-                textLabel.setText(CORRECT[(int)(Math.random() * CORRECT.length)]);
+                textLabel.setToCorrect();
             }
-
-
         }
 
     }
@@ -260,10 +240,10 @@ public class Game extends JFrame {
         textLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 24));
         disableKeyboard();
         if (isWon) {
-            textLabel.setText(WON[(int)(Math.random() * WON.length)]);
+            textLabel.setToWon();
             new Timer().schedule(new Dialog(this, "Congratulations, you won!"), 1500);
         } else {
-            textLabel.setText(LOST[(int)(Math.random() * LOST.length)]);
+            textLabel.setToLost();
             new Timer().schedule(new Dialog(
                     this,
                     (String.format("The word was %s. Try again?", new String(wordCharSeq)))
@@ -272,17 +252,17 @@ public class Game extends JFrame {
     }
 
     private void disableKeyboard() {
-        Arrays.stream(first).forEach(b -> {
+        Arrays.stream(firstColumn).forEach(b -> {
             b.setContentAreaFilled(false);
             b.setEnabled(false);
         });
 
-        Arrays.stream(second).forEach(b -> {
+        Arrays.stream(secondColumn).forEach(b -> {
             b.setContentAreaFilled(false);
             b.setEnabled(false);
         });
 
-        Arrays.stream(third).forEach(b -> {
+        Arrays.stream(thirdColumn).forEach(b -> {
             b.setContentAreaFilled(false);
             b.setEnabled(false);
         });
@@ -319,20 +299,7 @@ public class Game extends JFrame {
             );
         }
 
-        hangingMen = hangmanIcons.iterator();
-    }
-
-    /**
-     * Saves the images in variables at application startup.
-     */
-    private void setIcons()
-    {
-//        setHangmenIcons();
-
-        warning = new ImageIcon(Objects.requireNonNull(
-                getClass().getClassLoader().getResource("warning.png")
-        ));
-
+        hangmenIterator = hangmanIcons.iterator();
     }
 
 }
