@@ -99,16 +99,18 @@ public class Game extends JFrame {
                 Game.this.setWindowClosing();
             }
         });
+        /* https://wallpaperset.com/w/full/5/6/5/241724.jpg */
         setContentPane(new JLabel(new ImageIcon(
                 new ImageIcon(Objects.requireNonNull(
                         getClass().getClassLoader().getResource("background.jpeg")
-                )).getImage().getScaledInstance(1280, 720,  java.awt.Image.SCALE_SMOOTH)
+                )).getImage().getScaledInstance(1280, 720, Image.SCALE_SMOOTH)
         )));
         setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
         setLook();
         setSize(650, 500);
         setTitle("Hangman");
         setLocation(320, 80);
+        /* https://cdn3.iconfinder.com/data/icons/brain-games/1042/Hangman-Game.png */
         setIconImage(Toolkit.getDefaultToolkit().getImage(
                 getClass().getClassLoader().getResource("rope.png")
         ));
@@ -122,6 +124,7 @@ public class Game extends JFrame {
     private void setWindowClosing() {
         Object[] options = {"Exit", "Cancel"};
 
+        /* https://www.vecteezy.com/free-png/blob */
         int quit = JOptionPane.showOptionDialog(
                 null,
                 "Your progress will be lost.",

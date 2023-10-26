@@ -24,6 +24,7 @@ public class Drawing extends JLabel {
         List<Icon> hangmanIcons = new ArrayList<>();
         ImageIcon icon;
 
+        /* https://sketch.io */
         for (int i = 0; i <= 10; i++) {
             icon = new ImageIcon(Objects.requireNonNull(
                     getClass().getClassLoader().getResource("hangman" + i + ".png"))
